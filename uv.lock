@@ -492,6 +492,51 @@ wheels = [
 ]
 
 [[package]]
+name = "indsutry-momentum"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "ipykernel" },
+    { name = "marimo", extra = ["lsp", "mcp"] },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "plotly" },
+    { name = "polars" },
+    { name = "polars-ols" },
+    { name = "pyarrow" },
+    { name = "sf-backtester" },
+    { name = "sf-quant" },
+    { name = "tabulate" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "ipykernel", specifier = ">=7.2.0" },
+    { name = "marimo", extras = ["lsp", "mcp"], specifier = ">=0.19.7" },
+    { name = "numpy", specifier = ">=2.3.2" },
+    { name = "pandas", specifier = ">=3.0.0" },
+    { name = "plotly", specifier = ">=6.5.2" },
+    { name = "polars", specifier = ">=1.32.3" },
+    { name = "polars-ols", specifier = ">=0.3.5" },
+    { name = "pyarrow", specifier = ">=23.0.1" },
+    { name = "sf-backtester", specifier = ">=0.1.1" },
+    { name = "sf-quant", specifier = "==0.1.23" },
+    { name = "tabulate", specifier = ">=0.9.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = ">=1.19.1" },
+    { name = "ruff", specifier = ">=0.15.1" },
+]
+
+[[package]]
 name = "ipykernel"
 version = "7.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1797,51 +1842,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/57/9c/23020641ab681b73637cbc8eaab06efcd7980fe1c8e6b3bf35a1604c1a97/sf_quant-0.1.23.tar.gz", hash = "sha256:72790994f071d0522bd3e6e10b804db059613168917c1db99cedaad8753002be", size = 141947, upload-time = "2026-02-20T03:21:56.486Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/14/3e/2581048ace8ef3f6c3c0222621ddf988aea533c3b5187c0de9aa9910d977/sf_quant-0.1.23-py3-none-any.whl", hash = "sha256:4a7da3aec82d9afb3fde9af86a21d324b1683e88086596b9e2cb775d8e18aa0f", size = 48156, upload-time = "2026-02-20T03:21:55.366Z" },
-]
-
-[[package]]
-name = "sf-research"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "ipykernel" },
-    { name = "marimo", extra = ["lsp", "mcp"] },
-    { name = "numpy" },
-    { name = "pandas" },
-    { name = "plotly" },
-    { name = "polars" },
-    { name = "polars-ols" },
-    { name = "pyarrow" },
-    { name = "sf-backtester" },
-    { name = "sf-quant" },
-    { name = "tabulate" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "mypy" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "ipykernel", specifier = ">=7.2.0" },
-    { name = "marimo", extras = ["lsp", "mcp"], specifier = ">=0.19.7" },
-    { name = "numpy", specifier = ">=2.3.2" },
-    { name = "pandas", specifier = ">=3.0.0" },
-    { name = "plotly", specifier = ">=6.5.2" },
-    { name = "polars", specifier = ">=1.32.3" },
-    { name = "polars-ols", specifier = ">=0.3.5" },
-    { name = "pyarrow", specifier = ">=23.0.1" },
-    { name = "sf-backtester", specifier = ">=0.1.1" },
-    { name = "sf-quant", specifier = "==0.1.23" },
-    { name = "tabulate", specifier = ">=0.9.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "mypy", specifier = ">=1.19.1" },
-    { name = "ruff", specifier = ">=0.15.1" },
 ]
 
 [[package]]
