@@ -77,7 +77,7 @@ def load_data() -> pl.DataFrame:
     ]
 
     start = dt.date(2000, 1, 1)
-    end = dt.date(2010, 12, 31)
+    end = dt.date(2024, 12, 31)
 
     asset_columns = [
         'barrid', 
@@ -169,7 +169,7 @@ def load_data() -> pl.DataFrame:
     return ew_port, long
 
 
-def create_signal(df1, df2):
+def create_signal():
     """
     Loads data, creates a simple signal, and saves it to parquet.
     """
@@ -183,11 +183,8 @@ def create_signal(df1, df2):
 
 
     # TODO: Load Data
-    df1, df2 = load_data()
+    ew_port, long = load_data()
 
-    ew_port = df1
-    long = df2
-    
     # Calculate Momentum
     
 
@@ -232,13 +229,13 @@ def create_signal(df1, df2):
         )
     )
 
-    return industry_momentum
+    
 
     # TODO: Add your signal logic here (remember alpha logic)
 
     # TODO: Save to data/signal.parquet
 
-    pl.write_parquet(signal, output_path)
+    industry_momentum.write_parquet('data/signal.parquet')
 
 if __name__ == "__main__":
     create_signal()
