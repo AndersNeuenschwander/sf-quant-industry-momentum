@@ -23,7 +23,7 @@ def run_backtest():
     logs_dir = resolve_path("LOG_DIR", "logs")
     signal_name = os.getenv("SIGNAL_NAME", "my_first_signal")
     gamma = int(os.getenv("GAMMA", "50"))
-    byu_email = os.getenv("EMAIL", "user@byu.edu")
+    byu_email = os.getenv("EMAIL", "andersrn@byu.edu")
 
     # Validate that signal file exists
     if not os.path.exists(signal_path):
