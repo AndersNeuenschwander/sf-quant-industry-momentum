@@ -21,7 +21,7 @@ def run_backtest():
     signal_path = resolve_path("SIGNAL_PATH", "data/signal.parquet")
     output_dir = resolve_path("WEIGHT_DIR", "data/weights")
     logs_dir = resolve_path("LOG_DIR", "logs")
-    signal_name = os.getenv("SIGNAL_NAME", "my_first_signal")
+    signal_name = os.getenv("SIGNAL_NAME", "industry-momentum")
     gamma = int(os.getenv("GAMMA", "50"))
     byu_email = os.getenv("EMAIL", "andersrn@byu.edu")
 

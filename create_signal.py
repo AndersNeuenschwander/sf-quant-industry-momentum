@@ -24,78 +24,75 @@ def load_data() -> pl.DataFrame:
         "USSLOWL_SPLTYRET", "USSLOWL_SPTYCHEM", "USSLOWL_SPTYSTOR", "USSLOWL_TELECOM",
         "USSLOWL_TRADECO", "USSLOWL_TRANSPRT", "USSLOWL_WIRELESS",
     ]
+
+    # industry_cols = [
+    #     "date", "barrid",
+    #     "USSLOWL_VALUE",
+    # ]
     industry_only = [c for c in industry_cols if c not in ["date", "barrid"]]
 
-    start = dt.date(2012, 1, 1)
-    end = dt.date(2024, 12, 31)
+    # start = dt.date(2000, 1, 1)
+    # end = dt.date(2008, 1, 1)
+
+    start = dt.date(2008, 1, 1)
+    end = dt.date(2011, 1, 1)
+
+    # start = dt.date(2020, 1, 1)
+
+    # end = dt.date(2024, 12, 31)
 
     asset_columns = ['barrid', 'date', 'predicted_beta', 'return', 'specific_risk', 'price']
 
-    # Create Industry_exposure_df
-    # 0 indicates that stock is NOT in the industry and 1 indicates the stock IS in the industry
-    
+    # Load data
     industry_exposures_df = sfd.load_exposures(
-        start=start, 
-        end=end, 
-        in_universe=True,
-        columns=industry_cols
+        start=start, end=end, in_universe=True, columns=industry_cols
     )
 
-    
-
-    industry_only = [c for c in industry_cols if c not in ["date", "barrid"]]
-
-    industry_exposures_df = industry_exposures_df.with_columns(
-        pl.when(pl.col(c).is_null()).then(pl.lit(0)).otherwise(pl.lit(1)).cast(pl.Int8).alias(c)
-        for c in industry_only
-    )
-    
-    # create the assets data frame
+    print(industry_exposures_df)
 
     assets_df = sfd.load_assets(
-        start=start,
-        end=end,
-        columns=asset_columns,
-        in_universe=True,
-    )
-    # print(assets_df)
-    # Perform left merge on assets data frame with indsutry exposure data frame
-
-    industry_map = (
-        industry_exposures_df                          # wide: barrid, date, 59 industry cols
-        .unpivot(
-            on=industry_only,
-            index=["barrid", "date"],                 # only carry the keys through the explosion
-            variable_name="industry",
-            value_name="val",
-        )
-        .filter(pl.col("val") == 1)                   # keep only the industry each stock belongs to
-        .drop("val")                                   # no longer needed
+        start=start, end=end, columns=asset_columns, in_universe=True,
     )
 
-    long = (
-        industry_map
-        .join(assets_df, on=["barrid", "date"], how="left")
-        .with_columns(pl.col("return").truediv(100))
-        .with_columns(pl.col("return").log1p().alias("logreturn"))
-        .sort(["date", "industry"])
+
+    # Binarize industry columns (1 = in industry, 0 = not)
+    industry_exposures_df = industry_exposures_df.with_columns(
+        pl.when(pl.col(c).is_null()).then(0).otherwise(1).cast(pl.Int8).alias(c)
+        for c in industry_only
     )
 
-    # Create Equal Weight Portfolio
+    # Join assets with industry exposures
+    df = assets_df.join(industry_exposures_df, on=['date', 'barrid'], how='left')
+    df = df.with_columns([
+        (pl.col('return') / 100),
+        (pl.col('specific_risk') / 100),
+    ]).sort(['date', 'barrid'])
 
+    # --- Memory-efficient replacement for unpivot ---
+    # Intuition: instead of exploding the whole dataframe 60x at once,
+    # we figure out each stock's industry by finding which column == 1,
+    # then do a single join. One row per stock per date, no explosion.
+    
+    # For each stock-date, find which industry it belongs to
+    # (uses pl.arg_max across industry columns to find the "1" column)
+    industry_name_expr = pl.concat_str(
+        [pl.when(pl.col(c) == 1).then(pl.lit(c)).otherwise(pl.lit(None)) 
+         for c in industry_only],
+        ignore_nulls=True
+    ).alias("industry")
+
+    long = df.with_columns(industry_name_expr).drop(industry_only)
+
+    # Compute equal-weight portfolio return per industry-date
     ew_port = (
         long
         .group_by(["date", "industry"])
-        .agg(
-            pl.col('return').mean().alias("ew_return"),
-            )
+        .agg(pl.col('return').mean().alias("ew_return"))
         .sort(["industry", "date"])
     )
 
-    # print(ew_port)
-    # print(long)
-
     return ew_port, long
+
 
 def create_signal():
     """
@@ -109,11 +106,14 @@ def create_signal():
         output_path = os.path.join(project_root, output_path)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
+    print(output_path)
 
     # TODO: Load Data
     ew_port, long = load_data()
-    
-    
+    print(ew_port)
+    print()
+    print(long)
+
     # Calculate Momentum
     
 
@@ -124,12 +124,13 @@ def create_signal():
             pl.col('ew_return')
             .rolling_sum(window_size=230)
             .over('industry')
-            .alias('momentum')
+            .alias('signal')
         )
         .with_columns(
-            pl.col('momentum')
+            pl.col('signal')
             .shift(22)
             .over('industry')
+            .alias('signal')
         )
     )
     # go back to stock space and filter price
@@ -142,8 +143,8 @@ def create_signal():
     # z-score momentum
 
     industry_momentum = long.with_columns(
-        ((pl.col("momentum") - pl.col("momentum").mean().over("date")) / 
-        pl.col("momentum").std().over("date"))
+        ((pl.col("signal") - pl.col("signal").mean().over("date")) / 
+        pl.col("signal").std().over("date"))
         .alias("score")
     )
     # compute alpha
@@ -156,13 +157,8 @@ def create_signal():
             .mul(pl.col('specific_risk'))
             .alias('alpha')
         )
-        .with_columns(
-            pl.col('alpha')
-            .fill_null(0)
-            .alias('alpha')
-        )
     )
-    # print(industry_momentum)
+
     
 
     # TODO: Add your signal logic here (remember alpha logic)
