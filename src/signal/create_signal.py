@@ -41,15 +41,20 @@ def load_data() -> pl.DataFrame:
         columns=industry_cols
     )
 
-    
+    print(industry_exposures_df)
 
     industry_only = [c for c in industry_cols if c not in ["date", "barrid"]]
 
     industry_exposures_df = industry_exposures_df.with_columns(
-        pl.when(pl.col(c).is_null()).then(pl.lit(0)).otherwise(pl.lit(1)).cast(pl.Int8).alias(c)
-        for c in industry_only
+    pl.when(pl.col(c) == pl.col(c).max())
+    .then(pl.lit(1))
+    .otherwise(pl.lit(0))
+    .cast(pl.Int8)
+    .alias(c)
+    for c in industry_only
     )
-    
+
+
     # create the assets data frame
 
     assets_df = sfd.load_assets(
@@ -58,7 +63,7 @@ def load_data() -> pl.DataFrame:
         columns=asset_columns,
         in_universe=True,
     )
-    # print(assets_df)
+
     # Perform left merge on assets data frame with indsutry exposure data frame
 
     industry_map = (
@@ -72,14 +77,14 @@ def load_data() -> pl.DataFrame:
         .filter(pl.col("val") == 1)                   # keep only the industry each stock belongs to
         .drop("val")                                   # no longer needed
     )
-
     long = (
-        industry_map
-        .join(assets_df, on=["barrid", "date"], how="left")
-        .with_columns(pl.col("return").truediv(100))
-        .with_columns(pl.col("return").log1p().alias("logreturn"))
-        .sort(["date", "industry"])
-    )
+            industry_map
+            .join(assets_df, on=["barrid", "date"], how="left")
+            .with_columns(pl.col("return").truediv(100))
+            .with_columns(pl.col("return").log1p().alias("logreturn"))
+            .sort(["date", "industry"])
+        )
+
 
     # Create Equal Weight Portfolio
 
@@ -92,10 +97,8 @@ def load_data() -> pl.DataFrame:
         .sort(["industry", "date"])
     )
 
-    # print(ew_port)
-    # print(long)
-
     return ew_port, long
+    
 
 def create_signal():
     """
@@ -116,7 +119,6 @@ def create_signal():
     
     # Calculate Momentum
     
-
     industry_momentum = (
         ew_port
         .sort(['date', 'industry'])
@@ -135,9 +137,9 @@ def create_signal():
     # go back to stock space and filter price
 
     long = (long
-            .join(industry_momentum, on=['date', 'industry'], how='left')
-            .filter(pl.col('price') >= 5)
-            )
+        .join(industry_momentum, on=['date', 'industry'], how='left')
+        .filter(pl.col('price') >= 5)
+        )
     
     # z-score momentum
 
@@ -146,30 +148,34 @@ def create_signal():
         pl.col("momentum").std().over("date"))
         .alias("score")
     )
+    
     # compute alpha
 
     industry_momentum = (
         industry_momentum
+        .with_columns(
+            pl.col('specific_risk')
+            .truediv(100)
+        )
         .with_columns(
             pl.col('score')
             .mul(.05)
             .mul(pl.col('specific_risk'))
             .alias('alpha')
         )
-        .with_columns(
-            pl.col('alpha')
-            .fill_null(0)
-            .alias('alpha')
-        )
+        .drop_nulls()
     )
-    # print(industry_momentum)
-    
 
-    # TODO: Add your signal logic here (remember alpha logic)
+    print(industry_momentum)
 
-    # TODO: Save to data/signal.parquet
 
-    industry_momentum.write_parquet('data/signal.parquet')
+    # # TODO: Add your signal logic here (remember alpha logic)
+
+    # # TODO: Save to data/signal.parquet
+
+    industry_momentum.write_parquet(output_path)
+
+
 
 if __name__ == "__main__":
     create_signal()
