@@ -64,7 +64,6 @@ industry_exposures_df = industry_exposures_df.with_columns(
 
 # normalize factor exposures
 
-
 row_sum_expr = pl.sum_horizontal(industry_only)
 
 industry_exposures_df = industry_exposures_df.with_columns(
@@ -122,6 +121,7 @@ industry_momentum = (
         .shift(22)
         .over('industry')
     )
+    .drop_nulls()
 )
 
 # join the two data frames
@@ -133,6 +133,15 @@ df = (
     .agg(
         (pl.col("exposures") * pl.col("momentum")).sum().alias("momentum_score")
     )
+
+
+    # z-score cross-sectionally within each date
+
+    .with_columns(
+        ((pl.col("momentum_score") - pl.col("momentum_score").mean().over("date")) /
+         pl.col("momentum_score").std().over("date"))
+        .alias("momentum_zscore")
+    )
 )
 
 df = (
@@ -143,13 +152,24 @@ df = (
         how='left'
     )
     .with_columns(
-        pl.col('momentum_score')
+        pl.col('return')
+        .truediv(100)
+    )
+    .with_columns(
+        pl.col('momentum_zscore')
         .mul(0.5)
         .mul('specific_risk')
         .alias('alpha')
     )
+    .with_columns(
+        pl.col('price')
+        .shift(1)
+        .over('barrid')
+        .alias('price_lag')
+    )
     .filter(
-        pl.col('price') >=5
+        pl.col('price_lag') >=5,
+        pl.col('alpha').is_not_nan()
     )
 )
 

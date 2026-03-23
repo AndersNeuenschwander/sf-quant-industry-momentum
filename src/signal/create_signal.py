@@ -5,99 +5,97 @@ from dotenv import load_dotenv
 import sf_quant.data as sfd
 
 
-def load_data() -> pl.DataFrame:
-    industry_cols = [
-        "date", "barrid",
-        "USSLOWL_AERODEF", "USSLOWL_AIRLINES", "USSLOWL_ALUMSTEL", "USSLOWL_APPAREL",
-        "USSLOWL_AUTO", "USSLOWL_BANKS", "USSLOWL_BEVTOB", "USSLOWL_BIOLIFE",
-        "USSLOWL_BLDGPROD", "USSLOWL_CHEM", "USSLOWL_CNSTENG", "USSLOWL_CNSTMACH",
-        "USSLOWL_CNSTMATL", "USSLOWL_COMMEQP", "USSLOWL_COMPELEC", "USSLOWL_COMSVCS",
-        "USSLOWL_CONGLOM", "USSLOWL_CONTAINR", "USSLOWL_DISTRIB", "USSLOWL_DIVFIN",
-        "USSLOWL_ELECEQP", "USSLOWL_ELECUTIL", "USSLOWL_FOODPROD", "USSLOWL_FOODRET",
-        "USSLOWL_GASUTIL", "USSLOWL_HLTHEQP", "USSLOWL_HLTHSVCS", "USSLOWL_HOMEBLDG",
-        "USSLOWL_HOUSEDUR", "USSLOWL_INDMACH", "USSLOWL_INSURNCE", "USSLOWL_INTERNET",
-        "USSLOWL_LEISPROD", "USSLOWL_LEISSVCS", "USSLOWL_LIFEINS", "USSLOWL_MEDIA",
-        "USSLOWL_MGDHLTH", "USSLOWL_MULTUTIL", "USSLOWL_OILGSCON", "USSLOWL_OILGSDRL",
-        "USSLOWL_OILGSEQP", "USSLOWL_OILGSEXP", "USSLOWL_PAPER", "USSLOWL_PHARMA",
-        "USSLOWL_PRECMTLS", "USSLOWL_PSNLPROD", "USSLOWL_REALEST", "USSLOWL_RESTAUR",
-        "USSLOWL_ROADRAIL", "USSLOWL_SEMICOND", "USSLOWL_SEMIEQP", "USSLOWL_SOFTWARE",
-        "USSLOWL_SPLTYRET", "USSLOWL_SPTYCHEM", "USSLOWL_SPTYSTOR", "USSLOWL_TELECOM",
-        "USSLOWL_TRADECO", "USSLOWL_TRANSPRT", "USSLOWL_WIRELESS",
-    ]
-    industry_only = [c for c in industry_cols if c not in ["date", "barrid"]]
+# def load_data() -> pl.DataFrame:
 
-    start = dt.date(2012, 1, 1)
-    end = dt.date(2024, 12, 31)
+    # # Configurations
 
-    asset_columns = ['barrid', 'date', 'predicted_beta', 'return', 'specific_risk', 'price']
+    # # industry_cols = ['date', 'barrid', 'USSLOWL_AERODEF']
 
-    # Create Industry_exposure_df
-    # 0 indicates that stock is NOT in the industry and 1 indicates the stock IS in the industry
+    # industry_cols = [
+    #         "date", "barrid",
+    #         "USSLOWL_AERODEF", "USSLOWL_AIRLINES", "USSLOWL_ALUMSTEL", "USSLOWL_APPAREL",
+    #         "USSLOWL_AUTO", "USSLOWL_BANKS", "USSLOWL_BEVTOB", "USSLOWL_BIOLIFE",
+    #         "USSLOWL_BLDGPROD", "USSLOWL_CHEM", "USSLOWL_CNSTENG", "USSLOWL_CNSTMACH",
+    #         "USSLOWL_CNSTMATL", "USSLOWL_COMMEQP", "USSLOWL_COMPELEC", "USSLOWL_COMSVCS",
+    #         "USSLOWL_CONGLOM", "USSLOWL_CONTAINR", "USSLOWL_DISTRIB", "USSLOWL_DIVFIN",
+    #         "USSLOWL_ELECEQP", "USSLOWL_ELECUTIL", "USSLOWL_FOODPROD", "USSLOWL_FOODRET",
+    #         "USSLOWL_GASUTIL", "USSLOWL_HLTHEQP", "USSLOWL_HLTHSVCS", "USSLOWL_HOMEBLDG",
+    #         "USSLOWL_HOUSEDUR", "USSLOWL_INDMACH", "USSLOWL_INSURNCE", "USSLOWL_INTERNET",
+    #         "USSLOWL_LEISPROD", "USSLOWL_LEISSVCS", "USSLOWL_LIFEINS", "USSLOWL_MEDIA",
+    #         "USSLOWL_MGDHLTH", "USSLOWL_MULTUTIL", "USSLOWL_OILGSCON", "USSLOWL_OILGSDRL",
+    #         "USSLOWL_OILGSEQP", "USSLOWL_OILGSEXP", "USSLOWL_PAPER", "USSLOWL_PHARMA",
+    #         "USSLOWL_PRECMTLS", "USSLOWL_PSNLPROD", "USSLOWL_REALEST", "USSLOWL_RESTAUR",
+    #         "USSLOWL_ROADRAIL", "USSLOWL_SEMICOND", "USSLOWL_SEMIEQP", "USSLOWL_SOFTWARE",
+    #         "USSLOWL_SPLTYRET", "USSLOWL_SPTYCHEM", "USSLOWL_SPTYSTOR", "USSLOWL_TELECOM",
+    #         "USSLOWL_TRADECO", "USSLOWL_TRANSPRT", "USSLOWL_WIRELESS",
+    #     ]
+
+    # industry_only = [c for c in industry_cols if c not in ["date", "barrid"]]
+
+    # start = dt.date(2012, 1, 1)
+    # end = dt.date(2024, 12, 31)
+
+    # # Create Industry_exposure_df
+    # # 0 indicates that stock is NOT in the industry and 1 indicates the stock IS in the industry
+    # industry_exposures_df = sfd.load_exposures(
+    #     start=start, 
+    #     end=end, 
+    #     in_universe=True,
+    #     columns=industry_cols
+    # )
+
+    # industry_only = [c for c in industry_cols if c not in ["date", "barrid"]]
+
+    # industry_exposures_df = industry_exposures_df.with_columns(
+    #     pl.col(c).fill_null(0).alias(c)
+    #     for c in industry_only
+    # )
+
+    # # normalize factor exposures
+
+    # row_sum_expr = pl.sum_horizontal(industry_only)
+
+    # industry_exposures_df = industry_exposures_df.with_columns(
+    #     (pl.col(c) / row_sum_expr).alias(c)
+    #     for c in industry_only
+    # )
+
+    # # filter out the 0 values before unpivot to make join lighter down the script
+
+    # industry_exposures_df = (
+    #     industry_exposures_df
+    #     .filter(row_sum_expr > 0)          # <-- drop all-zero rows before the explosion
+    #     .unpivot(
+    #         on=industry_only,
+    #         index=['date', 'barrid'],
+    #         variable_name='industry',
+    #         value_name='exposures'
+    #     )
+    #     .filter(pl.col('exposures') > 0)
+    #     .fill_nan(0)   # <-- drop zero-exposure industry columns per row
+    # )
+
+
+    # # create factor returns data frame
+
+    # factor_returns_df = sfd.load_factors(
+    #     start=start, 
+    #     end=end, 
+    # )
     
-    industry_exposures_df = sfd.load_exposures(
-        start=start, 
-        end=end, 
-        in_universe=True,
-        columns=industry_cols
-    )
+    # # do some chill unpivoting
 
-    print(industry_exposures_df)
+    # factor_returns_df = (
+    #     factor_returns_df                          # wide: barrid, date, 59 industry cols
+    #     .unpivot(
+    #         on=industry_only,
+    #         index=["date"],                 # only carry the keys through the explosion
+    #         variable_name="industry",
+    #         value_name="return",
+    #     )
+    # )
 
-    industry_only = [c for c in industry_cols if c not in ["date", "barrid"]]
-
-    industry_exposures_df = industry_exposures_df.with_columns(
-    pl.when(pl.col(c) == pl.col(c).max())
-    .then(pl.lit(1))
-    .otherwise(pl.lit(0))
-    .cast(pl.Int8)
-    .alias(c)
-    for c in industry_only
-    )
-
-
-    # create the assets data frame
-
-    assets_df = sfd.load_assets(
-        start=start,
-        end=end,
-        columns=asset_columns,
-        in_universe=True,
-    )
-
-    # Perform left merge on assets data frame with indsutry exposure data frame
-
-    industry_map = (
-        industry_exposures_df                          # wide: barrid, date, 59 industry cols
-        .unpivot(
-            on=industry_only,
-            index=["barrid", "date"],                 # only carry the keys through the explosion
-            variable_name="industry",
-            value_name="val",
-        )
-        .filter(pl.col("val") == 1)                   # keep only the industry each stock belongs to
-        .drop("val")                                   # no longer needed
-    )
-    long = (
-            industry_map
-            .join(assets_df, on=["barrid", "date"], how="left")
-            .with_columns(pl.col("return").truediv(100))
-            .with_columns(pl.col("return").log1p().alias("logreturn"))
-            .sort(["date", "industry"])
-        )
-
-
-    # Create Equal Weight Portfolio
-
-    ew_port = (
-        long
-        .group_by(["date", "industry"])
-        .agg(
-            pl.col('return').mean().alias("ew_return"),
-            )
-        .sort(["industry", "date"])
-    )
-
-    return ew_port, long
+    # return factor_returns_df, industry_exposures_df
     
 
 def create_signal():
@@ -112,18 +110,113 @@ def create_signal():
         output_path = os.path.join(project_root, output_path)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
+    # Configurations
 
-    # TODO: Load Data
-    ew_port, long = load_data()
-    
-    
-    # Calculate Momentum
-    
+    # industry_cols = ['date', 'barrid', 'USSLOWL_AERODEF']
+
+    industry_cols = [
+            "date", "barrid",
+            "USSLOWL_AERODEF", "USSLOWL_AIRLINES", "USSLOWL_ALUMSTEL", "USSLOWL_APPAREL",
+            "USSLOWL_AUTO", "USSLOWL_BANKS", "USSLOWL_BEVTOB", "USSLOWL_BIOLIFE",
+            "USSLOWL_BLDGPROD", "USSLOWL_CHEM", "USSLOWL_CNSTENG", "USSLOWL_CNSTMACH",
+            "USSLOWL_CNSTMATL", "USSLOWL_COMMEQP", "USSLOWL_COMPELEC", "USSLOWL_COMSVCS",
+            "USSLOWL_CONGLOM", "USSLOWL_CONTAINR", "USSLOWL_DISTRIB", "USSLOWL_DIVFIN",
+            "USSLOWL_ELECEQP", "USSLOWL_ELECUTIL", "USSLOWL_FOODPROD", "USSLOWL_FOODRET",
+            "USSLOWL_GASUTIL", "USSLOWL_HLTHEQP", "USSLOWL_HLTHSVCS", "USSLOWL_HOMEBLDG",
+            "USSLOWL_HOUSEDUR", "USSLOWL_INDMACH", "USSLOWL_INSURNCE", "USSLOWL_INTERNET",
+            "USSLOWL_LEISPROD", "USSLOWL_LEISSVCS", "USSLOWL_LIFEINS", "USSLOWL_MEDIA",
+            "USSLOWL_MGDHLTH", "USSLOWL_MULTUTIL", "USSLOWL_OILGSCON", "USSLOWL_OILGSDRL",
+            "USSLOWL_OILGSEQP", "USSLOWL_OILGSEXP", "USSLOWL_PAPER", "USSLOWL_PHARMA",
+            "USSLOWL_PRECMTLS", "USSLOWL_PSNLPROD", "USSLOWL_REALEST", "USSLOWL_RESTAUR",
+            "USSLOWL_ROADRAIL", "USSLOWL_SEMICOND", "USSLOWL_SEMIEQP", "USSLOWL_SOFTWARE",
+            "USSLOWL_SPLTYRET", "USSLOWL_SPTYCHEM", "USSLOWL_SPTYSTOR", "USSLOWL_TELECOM",
+            "USSLOWL_TRADECO", "USSLOWL_TRANSPRT", "USSLOWL_WIRELESS",
+        ]
+
+    industry_only = [c for c in industry_cols if c not in ["date", "barrid"]]
+
+    start = dt.date(2012, 1, 1)
+    end = dt.date(2024, 12, 31)
+
+    asset_columns = ['barrid', 'date', 'predicted_beta', 'return', 'specific_risk', 'price']
+
+    # create the assets data frame
+
+    assets_df = sfd.load_assets(
+        start=start,
+        end=end,
+        columns=asset_columns,
+        in_universe=True,
+    )
+
+    assets_df
+
+    # Create Industry_exposure_df
+    # 0 indicates that stock is NOT in the industry and 1 indicates the stock IS in the industry
+    industry_exposures_df = sfd.load_exposures(
+        start=start, 
+        end=end, 
+        in_universe=True,
+        columns=industry_cols
+    )
+
+    industry_only = [c for c in industry_cols if c not in ["date", "barrid"]]
+
+    industry_exposures_df = industry_exposures_df.with_columns(
+        pl.col(c).fill_null(0).alias(c)
+        for c in industry_only
+    )
+
+    # normalize factor exposures
+
+    row_sum_expr = pl.sum_horizontal(industry_only)
+
+    industry_exposures_df = industry_exposures_df.with_columns(
+        (pl.col(c) / row_sum_expr).alias(c)
+        for c in industry_only
+    )
+
+    # filter out the 0 values before unpivot to make join lighter down the script
+
+    industry_exposures_df = (
+        industry_exposures_df
+        .filter(row_sum_expr > 0)          # <-- drop all-zero rows before the explosion
+        .unpivot(
+            on=industry_only,
+            index=['date', 'barrid'],
+            variable_name='industry',
+            value_name='exposures'
+        )
+        .filter(pl.col('exposures') > 0)
+        .fill_nan(0)   # <-- drop zero-exposure industry columns per row
+    )
+
+    # create factor returns data frame
+
+    factor_returns_df = sfd.load_factors(
+        start=start, 
+        end=end, 
+    )
+
+    # do some chill unpivoting
+
+    factor_returns_df = (
+        factor_returns_df                          # wide: barrid, date, 59 industry cols
+        .unpivot(
+            on=industry_only,
+            index=["date"],                 # only carry the keys through the explosion
+            variable_name="industry",
+            value_name="return",
+        )
+    )
+
+    # calculate momentum
+
     industry_momentum = (
-        ew_port
+        factor_returns_df
         .sort(['date', 'industry'])
         .with_columns(
-            pl.col('ew_return')
+            pl.col('return')
             .rolling_sum(window_size=230)
             .over('industry')
             .alias('momentum')
@@ -133,47 +226,59 @@ def create_signal():
             .shift(22)
             .over('industry')
         )
-    )
-    # go back to stock space and filter price
-
-    long = (long
-        .join(industry_momentum, on=['date', 'industry'], how='left')
-        .filter(pl.col('price') >= 5)
-        )
-    
-    # z-score momentum
-
-    industry_momentum = long.with_columns(
-        ((pl.col("momentum") - pl.col("momentum").mean().over("date")) / 
-        pl.col("momentum").std().over("date"))
-        .alias("score")
-    )
-    
-    # compute alpha
-
-    industry_momentum = (
-        industry_momentum
-        .with_columns(
-            pl.col('specific_risk')
-            .truediv(100)
-        )
-        .with_columns(
-            pl.col('score')
-            .mul(.05)
-            .mul(pl.col('specific_risk'))
-            .alias('alpha')
-        )
         .drop_nulls()
     )
 
-    print(industry_momentum)
+    # join the two data frames
+
+    df = (
+        industry_exposures_df
+        .join(industry_momentum, on=["date", "industry"], how="left")
+        .group_by(["date", "barrid"])
+        .agg(
+            (pl.col("exposures") * pl.col("momentum")).sum().alias("momentum_score")
+        )
 
 
-    # # TODO: Add your signal logic here (remember alpha logic)
+        # z-score cross-sectionally within each date
 
-    # # TODO: Save to data/signal.parquet
+        .with_columns(
+            ((pl.col("momentum_score") - pl.col("momentum_score").mean().over("date")) /
+            pl.col("momentum_score").std().over("date"))
+            .alias("momentum_zscore")
+        )
+    )
 
-    industry_momentum.write_parquet(output_path)
+    df = (
+        df
+        .join(
+            assets_df,
+            on=['barrid', 'date'],
+            how='left'
+        )
+        .with_columns(
+            pl.col('return')
+            .truediv(100)
+        )
+        .with_columns(
+            pl.col('momentum_zscore')
+            .mul(0.5)
+            .mul('specific_risk')
+            .alias('alpha')
+        )
+        .with_columns(
+            pl.col('price')
+            .shift(1)
+            .over('barrid')
+            .alias('price_lag')
+        )
+        .filter(
+            pl.col('price_lag') >=5,
+            pl.col('alpha').is_not_nan()
+        )
+    )
+
+    df.write_parquet(output_path)
 
 
 
