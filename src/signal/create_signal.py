@@ -19,7 +19,6 @@ def create_signal():
 
     # Configurations
 
-    # industry_cols = ['date', 'barrid', 'USSLOWL_AERODEF']
 
     industry_cols = [
             "date", "barrid",
