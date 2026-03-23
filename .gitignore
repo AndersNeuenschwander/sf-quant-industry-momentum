@@ -226,4 +226,4 @@ logs/
 data/
 
 # macOS
-.DS_Store
+.DS_Storecore.*
