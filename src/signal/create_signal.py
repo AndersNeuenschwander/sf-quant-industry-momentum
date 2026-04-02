@@ -12,13 +12,14 @@ def create_signal():
     # Load environment variables from .env file
     load_dotenv()
     project_root = os.getcwd()
-    output_path = os.getenv("SIGNAL_PATH", "data/signal.parquet")
+    output_path = os.getenv("SIGNAL_PATH", "data/signal/industry_momentum.parquet")
+    # output_path = os.getenv("SIGNAL_PATH", "data/signal/standard_momentum.parquet")
+    # output_path = os.getenv("SIGNAL_PATH", "data/signal/idiosyncratic_momentum.parquet")
     if not os.path.isabs(output_path):
         output_path = os.path.join(project_root, output_path)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     # Configurations
-
 
     industry_cols = [
             "date", "barrid",
@@ -117,12 +118,24 @@ def create_signal():
     )
 
     # calculate momentum
-
     industry_momentum = (
         factor_returns_df
-        .sort(['date', 'industry'])
+        .sort(['date', 'industry']) # date, barrid for standard momentum and idiosyncratic momentum (specific_return)
         .with_columns(
+            # compute rolling volatility using ewm_std with 22-day span
             pl.col('return')
+            .ewm_std(span=22)
+            .over('industry')
+            .alias('vol')
+        )
+        .with_columns(
+            # vol-scale the returns by dividing by variance
+            (pl.col('return') / (pl.col('vol')))
+            .alias('scaled_return')
+        )
+        .with_columns(
+            # sum the vol-scaled returns over the lookback window
+            pl.col('scaled_return')
             .rolling_sum(window_size=230)
             .over('industry')
             .alias('momentum')
@@ -173,6 +186,10 @@ def create_signal():
             .alias('alpha')
         )
         .with_columns(
+        pl.col('momentum_zscore')
+        .alias('signal')
+        )
+        .with_columns(
             pl.col('price')
             .shift(1)
             .over('barrid')
@@ -183,6 +200,143 @@ def create_signal():
             pl.col('alpha').is_not_nan()
         )
     )
+
+
+    ### standard_momentum signal code
+
+    # columns = ['barrid', 'date', 'predicted_beta', 'return', 'specific_risk', 'price']
+
+    # data = sfd.load_assets(
+    #     start=start,
+    #     end=end,
+    #     in_universe=True,
+    #     columns=columns
+    # )
+
+    # # calculate momentum
+
+    # df = (data
+    #     .with_columns(
+    #         pl.col('return').truediv(100)
+    #     )
+    #     .sort('barrid', 'date')
+    #     .with_columns(
+    #         # compute rolling volatility using ewm_std with 22-day span
+    #         pl.col('return')
+    #         .ewm_std(span=22, min_samples=22)
+    #         .over('barrid')
+    #         .alias('vol')
+    #     )
+    #     .with_columns(
+    #         # vol-scale the returns by dividing by variance
+    #         (pl.col('return') / (pl.col('vol')))
+    #         .alias('scaled_return')
+    #     )
+    #     .with_columns(
+    #         pl.col('scaled_return')
+    #         .rolling_sum(window_size=230)
+    #         .over('barrid')
+    #         .alias('momentum')
+    #     )
+    #     .with_columns(
+    #         pl.col('momentum').shift(22).over('barrid')
+    #     )
+    #     # filtering
+    #     .sort('barrid', 'date')
+    #         .with_columns(
+    #             pl.col('price').shift(1).over('barrid').alias('price_lag')
+    #         )
+    #         .filter(
+    #             pl.col('price_lag').gt(5),
+    #             pl.col('momentum').is_not_null()
+    #         )
+    #         .sort('barrid', 'date')
+    #     # z-score momentum
+    #     .with_columns(
+    #             ((pl.col("momentum") - pl.col("momentum").mean().over("date")) /
+    #             pl.col("momentum").std().over("date"))
+    #             .alias("momentum_zscore")
+    #         )
+    #     # calculate alpha
+    #     .with_columns(
+    #             pl.col('momentum_zscore')
+    #             .mul(0.5)
+    #             .mul('specific_risk')
+    #             .alias('alpha')
+    #         )
+    #     .with_columns(
+    #     pl.col('momentum_zscore')
+    #     .alias('signal')
+    #     )
+    # )
+
+    ### idiosyncratic_momentum signal code
+
+    # columns = ['barrid', 'date', 'predicted_beta', 'return', 'specific_risk', 'price', 'specific_return']
+
+    # data = sfd.load_assets(
+    #     start=start,
+    #     end=end,
+    #     in_universe=True,
+    #     columns=columns
+    # )
+
+    # # calculate momentum
+
+    # df = (data
+    #     .with_columns(
+    #         pl.col('specific_return').truediv(100)
+    #     )
+    #     .sort('barrid', 'date')
+    #     .with_columns(
+    #         # compute rolling volatility using ewm_std with 22-day span
+    #         pl.col('specific_return')
+    #         .ewm_std(span=22, min_samples=22)
+    #         .over('barrid')
+    #         .alias('vol')
+    #     )
+    #     .with_columns(
+    #         # vol-scale the returns by dividing by variance
+    #         (pl.col('specific_return') / (pl.col('vol')))
+    #         .alias('scaled_return')
+    #     )
+    #     .with_columns(
+    #         pl.col('scaled_return')
+    #         .rolling_sum(window_size=230)
+    #         .over('barrid')
+    #         .alias('momentum')
+    #     )
+    #     .with_columns(
+    #         pl.col('momentum').shift(22).over('barrid')
+    #     )
+    #     # filtering
+    #     .sort('barrid', 'date')
+    #         .with_columns(
+    #             pl.col('price').shift(1).over('barrid').alias('price_lag')
+    #         )
+    #         .filter(
+    #             pl.col('price_lag').gt(5),
+    #             pl.col('momentum').is_not_null()
+    #         )
+    #         .sort('barrid', 'date')
+    #     # z-score momentum
+    #     .with_columns(
+    #             ((pl.col("momentum") - pl.col("momentum").mean().over("date")) /
+    #             pl.col("momentum").std().over("date"))
+    #             .alias("momentum_zscore")
+    #         )
+    #     # calculate alpha
+    #     .with_columns(
+    #             pl.col('momentum_zscore')
+    #             .mul(0.5)
+    #             .mul('specific_risk')
+    #             .alias('alpha')
+    #         )
+    #     .with_columns(
+    #     pl.col('momentum_zscore')
+    #     .alias('signal')
+    #     )
+    # )
 
     df.write_parquet(output_path)
 
