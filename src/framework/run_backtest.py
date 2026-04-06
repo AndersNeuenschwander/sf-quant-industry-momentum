@@ -18,17 +18,22 @@ def run_backtest():
         return path
 
     # Get configuration from environment variables with fallback defaults
-    signal_path = resolve_path("SIGNAL_PATH", "data/signal/industry_momentum.parquet")
+
+    # signal_path = resolve_path("SIGNAL_PATH", "data/signal/industry_momentum.parquet")
     # signal_path = resolve_path("SIGNAL_PATH", "data/signal/standard_momentum.parquet")
-    # signal_path = resolve_path("SIGNAL_PATH", "data/signal/idiosyncratic_momentum.parquet")
-    output_dir = resolve_path("WEIGHT_DIR", "data/weights/industry_momentum")
+    signal_path = resolve_path("SIGNAL_PATH", "data/signal/idiosyncratic_momentum.parquet")
+
+    # output_dir = resolve_path("WEIGHT_DIR", "data/weights/industry_momentum")
     # output_dir = resolve_path("WEIGHT_DIR", "data/weights/standard_momentum")
-    # output_dir = resolve_path("WEIGHT_DIR", "data/weights/idiosyncratic_momentum")
+    output_dir = resolve_path("WEIGHT_DIR", "data/weights/idiosyncratic_momentum")
+
     logs_dir = resolve_path("LOG_DIR", "logs")
-    signal_name = os.getenv("SIGNAL_NAME", "industry-momentum")
+
+    # signal_name = os.getenv("SIGNAL_NAME", "industry-momentum")
     # signal_name = os.getenv("SIGNAL_NAME", "standard-momentum")
-    # signal_name = os.getenv("SIGNAL_NAME", "idiosyncratic-momentum")
-    gamma = int(os.getenv("GAMMA", "50"))
+    signal_name = os.getenv("SIGNAL_NAME", "idiosyncratic-momentum")
+
+    gamma = int(os.getenv("GAMMA", "591"))
     byu_email = os.getenv("EMAIL", "andersrn@byu.edu")
 
     # Validate that signal file exists

@@ -26,12 +26,12 @@ def _(marimo):
 
 @app.cell
 def _(marimo):
-    data_dir = marimo.ui.text(value="data/weights/industry_momentum", label="Weights directory:")
+    # data_dir = marimo.ui.text(value="data/weights/industry_momentum", label="Weights directory:")
     # data_dir = marimo.ui.text(value="data/weights/standard_momentum", label="Weights directory:")
-    # data_dir = marimo.ui.text(value="data/weights/idiosyncratic_momentum", label="Weights directory:")
-    signal_file = marimo.ui.text(value="data/signal/industry_momentum.parquet", label="Signal file:")
+    data_dir = marimo.ui.text(value="data/weights/idiosyncratic_momentum", label="Weights directory:")
+    # signal_file = marimo.ui.text(value="data/signal/industry_momentum.parquet", label="Signal file:")
     # signal_file = marimo.ui.text(value="data/signal/standard_momentum.parquet", label="Signal file:")
-    # signal_file = marimo.ui.text(value="data/signal/idiosyncratic_momentum.parquet", label="Signal file:")
+    signal_file = marimo.ui.text(value="data/signal/idiosyncratic_momentum.parquet", label="Signal file:")
     marimo.hstack([data_dir, signal_file])
     return data_dir, signal_file
 

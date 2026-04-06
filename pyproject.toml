@@ -7,8 +7,8 @@ requires-python = ">=3.13, <3.14"
 dependencies = [
     "numpy>=2.3.2",
     "polars>=1.32.3",
-    "sf-quant==0.1.23",
-    "sf-backtester>=0.1.1",
+    "sf-quant==0.2.4",
+    "sf-backtester>=0.2.0",
     "marimo[lsp,mcp]>=0.19.7",
     "plotly>=6.5.2",
     "polars-ols>=0.3.5",
@@ -16,6 +16,8 @@ dependencies = [
     "pyarrow>=23.0.1",
     "tabulate>=0.9.0",
     "ipykernel>=7.2.0",
+    "great-tables>=0.21.0",
+    "selenium>=4.41.0",
 ]
 
 [dependency-groups]
